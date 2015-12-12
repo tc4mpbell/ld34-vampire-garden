@@ -18,54 +18,74 @@ var Pathfinder = (function () {
     this.easystar.setAcceptableTiles([2]);
     //this.easystar.enableCornerCutting();
     this.easystar.enableDiagonals();
+
+    this.updateGrid();
   }
 
   _createClass(Pathfinder, [{
     key: "updateGrid",
     value: function updateGrid() {
-      var level = _.chunk(game.map.layers[0].data, game.map.width);
-      this.easystar.setGrid(level);
+      if (game.map) {
+        var level = _.chunk(game.map.layers[0].data, game.map.width);
+        level = _.map(level[0], function (row) {
+          var mapped = _.map(row, function (c) {
+            return c.index;
+          });
+          return mapped;
+        });
+        this.easystar.setGrid(level);
+      }
 
       // Need to update everyone's paths?
     }
   }, {
     key: "getDirection",
-    value: function getDirection(path) {
-      var ix = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+    value: function getDirection(path, sprite) {
+      var ix = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
 
+      var spriteTileX = Math.floor(sprite.x / 128);
+      var spriteTileY = Math.floor(sprite.y / 128);
+      // var targetTileX = Math.floor(toX/128);
+      // var targetTileY = Math.floor(toY/128);
+
+      var currentNextPointX, currentNextPointY;
       if (path) {
+        console.log("Get getDirection", path, ix);
         currentNextPointX = path[ix].x;
         currentNextPointY = path[ix].y;
       }
-      if (currentNextPointX < game.character.x && currentNextPointY < game.character.y) {
+
+      console.log(currentNextPointX, spriteTileX, currentNextPointY, spriteTileY);
+
+      if (currentNextPointX < spriteTileX && currentNextPointY < spriteTileY) {
         // left up
         console.log("GO LEFT UP");
         return "NW";
-      } else if (currentNextPointX == game.character.x && currentNextPointY < game.character.y) {
+      } else if (currentNextPointX == spriteTileX && currentNextPointY < spriteTileY) {
         // up
         console.log("GO UP");
         return "N";
-      } else if (currentNextPointX > game.character.x && currentNextPointY < game.character.y) {
+      } else if (currentNextPointX > spriteTileX && currentNextPointY < spriteTileY) {
         // right up
         console.log("GO RIGHT UP");
         return "NE";
-      } else if (currentNextPointX < game.character.x && currentNextPointY == game.character.y) {
+      } else if (currentNextPointX < spriteTileX && currentNextPointY == spriteTileY) {
         // left
         console.log("GO LEFT");
         return "W";
-      } else if (currentNextPointX > game.character.x && currentNextPointY == game.character.y) {
+      } else if (currentNextPointX > spriteTileX && currentNextPointY == spriteTileY) {
         // right
         console.log("GO RIGHT");
         return "E";
-      } else if (currentNextPointX > game.character.x && currentNextPointY > game.character.y) {
+      } else if (currentNextPointX > spriteTileX && currentNextPointY > spriteTileY) {
         // right down
         console.log("GO RIGHT DOWN");
         return "SE";
-      } else if (currentNextPointX == game.character.x && currentNextPointY > game.character.y) {
+      } else if (currentNextPointX == spriteTileX && currentNextPointY > spriteTileY) {
         // down
         console.log("GO DOWN");
         return "S";
-      } else if (currentNextPointX < game.character.x && currentNextPointY > game.character.y) {
+      } else if (currentNextPointX < spriteTileX && currentNextPointY > spriteTileY) {
         // left down
         console.log("GO LEFT DOWN");
         return "SW";
@@ -75,13 +95,13 @@ var Pathfinder = (function () {
     }
   }, {
     key: "findPath",
-    value: function findPath(entity, entityPathName, fromX, fromY, toX, toY) {
+    value: function findPath(entity, entityDestination, fromX, fromY, toX, toY) {
       var fromTileX = Math.floor(fromX / 128);
       var fromTileY = Math.floor(fromY / 128);
       var targetTileX = Math.floor(toX / 128);
       var targetTileY = Math.floor(toY / 128);
 
-      var currentNextPointX, currentNextPointY;
+      console.log(fromTileY, fromTileY, targetTileX, targetTileY);
 
       this.easystar.findPath(fromTileX, fromTileY, targetTileX, targetTileY, function (path) {
         if (path === null) {
@@ -89,11 +109,12 @@ var Pathfinder = (function () {
         }
 
         if (path) {
-          entity.paths[entityPathName] = path;
-          console.log(path);
-
-          currentNextPointX = path[1].x;
-          currentNextPointY = path[1].y;
+          var pathObj = {
+            destination: entityDestination,
+            path: path
+          };
+          entity.paths.push(pathObj); //[entityPathName] = path;
+          console.log(pathObj);
         }
 
         // if (enemyDirection != "STOP") cowboy.animations.play(enemyDirection);

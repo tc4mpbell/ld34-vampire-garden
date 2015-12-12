@@ -6,6 +6,13 @@ class Garden {
 		return this.plants;
 	}
 
+
+	// TODO
+	static findUnassignedPlant() {
+		console.log("All plants", this.plants);
+		return _.sample(this.plants);
+	}
+
 	static addPlant() {
 		if(!this.plants) this.plants = [];
 		var marker = {};
@@ -21,12 +28,15 @@ class Garden {
 
 class Plant {
 	// Health: 2 (growing!), 1 (wilting), or 0 (dead)
-	get health() { return this._health || 2; }
+	get health() { return this._health; }
+	set health(h) { this._health = h; }
 
 	// get sprite() { return _sprite; }
 	// set sprite(s) { _sprite = s; }
 
 	constructor(x, y) {
+		this.health = 2;
+
 	    var tile = game.map.getTile( 0, 0, game.plantLayer);
 
 	    var tileX = game.plantLayer.getTileX(x); 
@@ -45,16 +55,22 @@ class Plant {
 		game.pathfinder.updateGrid();     
 	}
 
+	water() {
+		this.health = 3;
+	}
+
 	updateHealthStatus() {
-		console.log("update health");
+		console.log("update health", this.health);
 		// runs daily, see if i'm dead
 		if(this.health == 0) {
 			this.sprite.alive = false;
+			this.sprite.frame = 5;
 		} else if(this.health == 1) {
 			this.sprite.frame = 4;
 		} else if(this.sprite.frame < 3) {
 			this.sprite.frame += 1;
-
 		}
+
+		this.health -= 1;
 	}
 }

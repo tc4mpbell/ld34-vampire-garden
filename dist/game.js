@@ -37,6 +37,8 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       this.moveCharacter(null, cursorPos);
 
       Garden.addPlant();
+
+      //VampireManager.hireVampire();
     },
     create: function create() {
       game.map = game.add.tilemap('garden');
@@ -56,7 +58,7 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       //  This resizes the game world to match the layer dimensions
       game.plantLayer.resizeWorld();
 
-      game.character = player = game.add.sprite(128 + 64, 64 + 128, 'vampire', 0);
+      //game.character = player = game.add.sprite(128+64, 64+128, 'vampire', 0);
 
       //////////
 
@@ -69,13 +71,8 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       // Let's make a load of tiles on a grid.
       // this.spawnTiles();
 
-      player.animations.add('walk', [0, 1], 8, true);
       // Create another cube as our 'player', and set it up just like the cubes above.
       //player = game.add.isoSprite(128, 128, 0, 'cube', 0, groundGroup);
-      player.tint = 0x86bfda;
-      player.anchor.set(0.5);
-      game.physics.arcade.enable(player);
-      player.body.collideWorldBounds = true;
     },
     update: function update() {
       // Update the cursor position.
@@ -149,19 +146,19 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
     // Move character to a defined point
     moveCharacter: function moveCharacter(sprite, pointer) {
 
-      if (game.characterTween && game.characterTween.isRunning) {
-        game.characterTween.stop();
-      }
+      // if (game.characterTween && game.characterTween.isRunning) {
+      //   game.characterTween.stop();
+      // }
 
-      game.character.targetX = pointer.x; // "worldX" instead of just "x" is important so that the player can move
-      game.character.targetY = pointer.y;
+      // game.character.targetX = pointer.x; // "worldX" instead of just "x" is important so that the player can move
+      // game.character.targetY = pointer.y;
 
-      if (game.character.x < game.character.targetX) {
-        // Define which way the character is facing when walking 
-        game.character.scale.x = 1; // Character faces right
-      } else {
-          game.character.scale.x = -1; // Character faces left
-        }
+      // if (game.character.x < game.character.targetX) { // Define which way the character is facing when walking 
+      //   game.character.scale.x = 1; // Character faces right
+      // }
+      // else {
+      //   game.character.scale.x = -1; // Character faces left
+      // }
 
       // // defaultWalkingVelocity is pixels per second that the character will move.
       // // Y is 500 by default, 3d movement can be added by calculating/adding that too.

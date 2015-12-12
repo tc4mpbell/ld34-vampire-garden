@@ -18,6 +18,15 @@ var Garden = (function () {
 		value: function getPlants() {
 			return this.plants;
 		}
+
+		// TODO
+
+	}, {
+		key: "findUnassignedPlant",
+		value: function findUnassignedPlant() {
+			console.log("All plants", this.plants);
+			return _.sample(this.plants);
+		}
 	}, {
 		key: "addPlant",
 		value: function addPlant() {
@@ -42,7 +51,10 @@ var Plant = (function () {
 
 		// Health: 2 (growing!), 1 (wilting), or 0 (dead)
 		get: function get() {
-			return this._health || 2;
+			return this._health;
+		},
+		set: function set(h) {
+			this._health = h;
 		}
 
 		// get sprite() { return _sprite; }
@@ -52,6 +64,8 @@ var Plant = (function () {
 
 	function Plant(x, y) {
 		_classCallCheck(this, Plant);
+
+		this.health = 2;
 
 		var tile = game.map.getTile(0, 0, game.plantLayer);
 
@@ -72,17 +86,25 @@ var Plant = (function () {
 	}
 
 	_createClass(Plant, [{
+		key: "water",
+		value: function water() {
+			this.health = 3;
+		}
+	}, {
 		key: "updateHealthStatus",
 		value: function updateHealthStatus() {
-			console.log("update health");
+			console.log("update health", this.health);
 			// runs daily, see if i'm dead
 			if (this.health == 0) {
 				this.sprite.alive = false;
+				this.sprite.frame = 5;
 			} else if (this.health == 1) {
 				this.sprite.frame = 4;
 			} else if (this.sprite.frame < 3) {
 				this.sprite.frame += 1;
 			}
+
+			this.health -= 1;
 		}
 	}]);
 
