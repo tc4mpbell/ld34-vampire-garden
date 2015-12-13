@@ -68,7 +68,7 @@ var Vampire = (function (_WalkingSprite) {
 		_this.paths = [];
 		_this.curPath = null;
 		_this.plantsToWaterIx = 0;
-		_this.waterLevel = 1;
+		_this.waterLevel = 3;
 		_this.goingToFountain = false;
 		_this.id = _.uniqueId();
 
@@ -85,7 +85,7 @@ var Vampire = (function (_WalkingSprite) {
 		_this.sprite.animations.add('walk', [0, 1], 8, true);
 
 		//this.sprite.tint = 0x86bfda;
-		_this.sprite.anchor.set(1, 1);
+		_this.sprite.anchor.set(0.5, 1);
 		game.physics.arcade.enable(_this.sprite);
 		_this.sprite.body.collideWorldBounds = true;
 
@@ -140,7 +140,7 @@ var Vampire = (function (_WalkingSprite) {
 					// need to return to the fountain!
 					this.waterLevel = 0;
 					this.goingToFountain = true;
-					game.pathfinder.findPath(this, game.fountain, this.sprite.x, this.sprite.y, game.fountain.x + game.fountain.width + 1, game.fountain.y + game.fountain.height + 1);
+					game.pathfinder.findPath(this, game.fountain, this.sprite.x, this.sprite.y, game.fountain.x + game.fountain.width + 1, game.fountain.y + game.fountain.height / 2);
 				} else {
 					//get water plant path
 					var p = this.plantsToWater[this.plantsToWaterIx];
@@ -164,7 +164,7 @@ var Vampire = (function (_WalkingSprite) {
 					// REFILL WATER
 					console.log("REFILLING)");
 					that.goingToFountain = false;
-					that.waterLevel = 1;
+					that.waterLevel = 3;
 				}, 1000);
 			} else {
 				this.water(this.curPath.destination);

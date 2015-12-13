@@ -15,7 +15,7 @@ var Pathfinder = (function () {
 
     this.easystar.setIterationsPerCalculation(1000);
 
-    this.easystar.setAcceptableTiles([1]);
+    this.easystar.setAcceptableTiles([1, 9]);
     this.easystar.enableCornerCutting();
     //this.easystar.enableDiagonals();
 
@@ -64,41 +64,35 @@ var Pathfinder = (function () {
       if (currentNextPointX < spriteTileX && currentNextPointY < spriteTileY) {
         // left up
         //console.log("GO LEFT UP");
-        sprite.scale.x = -1;
+
         return "NW";
       } else if (currentNextPointX == spriteTileX && currentNextPointY < spriteTileY) {
         // up
-        sprite.scale.x = 1;
         //console.log("GO UP");
         return "N";
       } else if (currentNextPointX > spriteTileX && currentNextPointY < spriteTileY) {
         // right up
-        sprite.scale.x = 1;
+
         //console.log("GO RIGHT UP");
         return "NE";
       } else if (currentNextPointX < spriteTileX && currentNextPointY == spriteTileY) {
         // left
-        sprite.scale.x = -1;
         //console.log("GO LEFT");
         return "W";
       } else if (currentNextPointX > spriteTileX && currentNextPointY == spriteTileY) {
         // right
-        sprite.scale.x = 1;
         //console.log("GO RIGHT");
         return "E";
       } else if (currentNextPointX > spriteTileX && currentNextPointY > spriteTileY) {
         // right down
-        sprite.scale.x = 1;
         //console.log("GO RIGHT DOWN");
         return "SE";
       } else if (currentNextPointX == spriteTileX && currentNextPointY > spriteTileY) {
         // down
-        sprite.scale.x = 1;
         //console.log("GO DOWN");
         return "S";
       } else if (currentNextPointX < spriteTileX && currentNextPointY > spriteTileY) {
         // left down
-        sprite.scale.x = -1;
         //console.log("GO LEFT DOWN");
         return "SW";
       } else {

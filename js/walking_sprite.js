@@ -18,6 +18,8 @@ class WalkingSprite {
 		game.physics.arcade.collide(this.sprite, game.fountain, function() {
 			console.log("******************** collide fountain ***");
 			if(this.collidedWithFountain) { this.collidedWithFountain(); }
+			this.sprite.x += 10;
+			this.sprite.y -= 10;
 			this.recalcPath();
 		}, null, this);	
 
@@ -31,56 +33,60 @@ class WalkingSprite {
 			if(!this.pathIx) this.pathIx = 1;
 
 			//console.log("PATH", this.curPath);
-
-			var dir = game.pathfinder.getDirection(this.curPath.path, this.sprite, this.pathIx);
+			var oldDir = this.curDir;
+			this.curDir = game.pathfinder.getDirection(this.curPath.path, this.sprite, this.pathIx);
 			//console.log("DIR", dir, this.sprite.body);
 
-			if (dir == "N") {
+			if(oldDir != this.curDir) {
+				this.sprite.body.scale *= -1; //flip
+			}
+
+			if (this.curDir == "N") {
 	        	this.sprite.body.velocity.x = -this.speed;
 	        	this.sprite.body.velocity.y = -this.speed;
 	        }
-	        else if (dir == "S")
+	        else if (this.curDir == "S")
 	        {
 	        	this.sprite.body.velocity.x = this.speed;
 	        	this.sprite.body.velocity.y = this.speed;
 	        }
-	        else if (dir == "E") {
+	        else if (this.curDir == "E") {
 	        	this.sprite.body.velocity.x = this.speed;
 	        	this.sprite.body.velocity.y = -this.speed;
 	        }
-	        else if (dir == "W")
+	        else if (this.curDir == "W")
 	        {
 	        	this.sprite.body.velocity.x = -this.speed;
 	        	this.sprite.body.velocity.y = this.speed;
 	        }
-	        else if (dir == "SE")
+	        else if (this.curDir == "SE")
 	        {
 	        	this.sprite.body.velocity.x = this.speed;
 	        	this.sprite.body.velocity.y = 0;
 	        }
-	        else if (dir == "NW")
+	        else if (this.curDir == "NW")
 	        {
 	        	this.sprite.body.velocity.x = -this.speed;
 	        	this.sprite.body.velocity.y = 0;   	
 	        }
-	        else if (dir == "SW")
+	        else if (this.curDir == "SW")
 	        {
 	        	this.sprite.body.velocity.x = 0;
 	        	this.sprite.body.velocity.y = this.speed;    	
 	        }
 	       
-	        else if (dir == "NE")
+	        else if (this.curDir == "NE")
 	        {
 	        	this.sprite.body.velocity.x = 0;
 	        	this.sprite.body.velocity.y = -this.speed;
 	        }
-	        else if (dir == "STOP")
+	        else if (this.curDir == "STOP")
 	        {
 	        	this.sprite.animations.stop();
 	        	this.sprite.body.velocity.x = 0;
 	        	this.sprite.body.velocity.y = 0;
 	        }
-	        else // JUST IN CASE IF dir wouldnt exist we stop the cowboy movement
+	        else // JUST IN CASE IF this.curDir wouldnt exist we stop the cowboy movement
 	        {
 	        	this.sprite.body.velocity.x = 0;
 	        	this.sprite.body.velocity.y = 0;
@@ -90,11 +96,11 @@ class WalkingSprite {
 	        	this.pathIx = 1;
 	        }
 
-	        if(dir && dir != 'STOP') {
+	        if(this.curDir && this.curDir != 'STOP') {
 	        	this.sprite.animations.play("walk");
-	        } else if(dir == "STOP" && this.pathIx < this.curPath.path.length - 1) {
+	        } else if(this.curDir == "STOP" && this.pathIx < this.curPath.path.length - 1) {
 		        this.pathIx ++;
-		    } else if(dir == "STOP") {
+		    } else if(this.curDir == "STOP") {
 		    	if(this.afterPath) this.afterPath(); // can be overridden for fun!
 
 		    	this.curPath = null;

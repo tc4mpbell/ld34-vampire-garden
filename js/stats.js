@@ -1,6 +1,6 @@
 class Stats {
 	// def to 1
-	static get efficiency() { return this._efficiency || 1; }
+	static get efficiency() { return this._efficiency || 2; }
     static set efficiency(value) { this._efficiency = value; }
 
     static get unrest() { return this._unrest || 0; }
@@ -9,7 +9,7 @@ class Stats {
     static get howManyVisitors() {
     	// healthy plants / 2 is the potential number
     	// divide by likelihood to visit to get actual 
-    	console.log("likelihoodToVisit", this.likelihoodToVisit, (Garden.getLivePlants().length / 2) * (this.likelihoodToVisit/100));
+    	//console.log("likelihoodToVisit", this.likelihoodToVisit, (Garden.getLivePlants().length / 2) * (this.likelihoodToVisit/100));
     	return Math.floor((Garden.getLivePlants().length / 2) * (this.likelihoodToVisit/100));
     }
 
@@ -30,12 +30,10 @@ class Stats {
     }
 
     static subtractMoney(amt) {
-    	console.log("MONEYs", amt);
     	this.money -= amt;
     }
 
     static addMoney(amt) {
-    	console.log("MONEYs", amt);
     	this.money += amt;
     }
 
@@ -69,7 +67,7 @@ class Stats {
 	static display() {
 		
 		this.moneyText.text = "Money: " + this.money;
-		this.vampires.text = VampireManager.getVampires().length + " vampire" + (VampireManager.getVampires().length == 1 ? "" : "s");
+		this.vampires.text = VampireManager.getVampires().length + " vampire" + (VampireManager.getVampires().length == 1 ? "" : "s") + (_.isEmpty(VampireManager.pendingVampires) ? "" : "\nPending:" + VampireManager.pendingVampires.length);
 
 		game.world.bringToTop(game.textGroup);
 

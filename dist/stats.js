@@ -13,13 +13,11 @@ var Stats = (function () {
     key: "subtractMoney",
     // (this.unrest > 0 ? this.unrest : 1);
     value: function subtractMoney(amt) {
-      console.log("MONEYs", amt);
       this.money -= amt;
     }
   }, {
     key: "addMoney",
     value: function addMoney(amt) {
-      console.log("MONEYs", amt);
       this.money += amt;
     }
   }, {
@@ -55,7 +53,7 @@ var Stats = (function () {
     value: function display() {
 
       this.moneyText.text = "Money: " + this.money;
-      this.vampires.text = VampireManager.getVampires().length + " vampire" + (VampireManager.getVampires().length == 1 ? "" : "s");
+      this.vampires.text = VampireManager.getVampires().length + " vampire" + (VampireManager.getVampires().length == 1 ? "" : "s") + (_.isEmpty(VampireManager.pendingVampires) ? "" : "\nPending:" + VampireManager.pendingVampires.length);
 
       game.world.bringToTop(game.textGroup);
 
@@ -70,7 +68,7 @@ var Stats = (function () {
 
     // def to 1
     get: function get() {
-      return this._efficiency || 1;
+      return this._efficiency || 2;
     },
     set: function set(value) {
       this._efficiency = value;
@@ -88,7 +86,7 @@ var Stats = (function () {
     get: function get() {
       // healthy plants / 2 is the potential number
       // divide by likelihood to visit to get actual
-      console.log("likelihoodToVisit", this.likelihoodToVisit, Garden.getLivePlants().length / 2 * (this.likelihoodToVisit / 100));
+      //console.log("likelihoodToVisit", this.likelihoodToVisit, (Garden.getLivePlants().length / 2) * (this.likelihoodToVisit/100));
       return Math.floor(Garden.getLivePlants().length / 2 * (this.likelihoodToVisit / 100));
     }
 

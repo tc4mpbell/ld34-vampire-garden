@@ -59,8 +59,7 @@ var Garden = (function () {
 		value: function validPlantPos(x, y) {
 			if (!this.plantMap) this.plantMap = {}; //stores locs where plants are in this game
 
-			if (this.plantMap[x + "-" + y] || game.fountain.body.hitTest(game.input.activePointer.worldX, game.input.activePointer.worldY)) {
-				console.log("NO");
+			if (this.plantMap[x + "-" + y] || game.fountain.body.hitTest(game.input.activePointer.worldX, game.input.activePointer.worldY) || game.map.getTile(x / game.tileSize, y / game.tileSize).index != 1) {
 				return false;
 			} else {
 				return true;
@@ -125,7 +124,7 @@ var Plant = (function () {
 		//game.map.putTile(tile, tileX, tileY, game.plantLayer);
 
 		this.sprite = game.add.sprite(x, y, 'plant', 1, game.groundGroup);
-		this.sprite.scale.setTo(6, 6);
+		this.sprite.scale.setTo(game.scaleFactor / 1.5);
 
 		this.planted = Date.now();
 

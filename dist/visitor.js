@@ -27,7 +27,9 @@ var VisitorManager = (function () {
 			if (!this.visitors) this.visitors = [];
 
 			_.each(this.visitors, function (v) {
-				v.update();
+				if (v && v.update) {
+					v.update();
+				}
 			});
 
 			// should we get some more visitors? Let's find out!
@@ -66,8 +68,10 @@ var Visitor = (function (_WalkingSprite) {
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Visitor).call(this));
 
-		_this.sprite = game.add.sprite(-10, 150, 'visitor', 0, game.characterGroup);
+		_this.sprite = game.add.sprite(game.gate.x + 20, game.gate.y + 50, 'visitor', 0, game.characterGroup);
 		_this.sprite.animations.add('walk', [0, 1], 8, true);
+
+		//this.sprite.scale.setTo();//(1/(96/game.tileSize), 1/(96/game.tileSize));
 
 		_this.sprite.anchor.set(0.5, 0.5);
 		game.physics.arcade.enable(_this.sprite);
@@ -75,7 +79,7 @@ var Visitor = (function (_WalkingSprite) {
 		_this.sprite.body.bounce.setTo(1, 1);
 		_this.id = _.uniqueId();
 
-		_this.speed = 100;
+		_this.speed = 170;
 		return _this;
 	}
 
@@ -91,6 +95,14 @@ var Visitor = (function (_WalkingSprite) {
 			this.findingPath = false;
 		}
 	}, {
+		key: 'leave',
+		value: function leave() {
+			//leave this garden!
+			this.leaving = true;
+			this.findingPath = true;
+			game.pathfinder.findPath(this, null, this.sprite.x, this.sprite.y, game.gate.x, game.gate.y);
+		}
+	}, {
 		key: 'nextPath',
 		value: function nextPath() {
 			if (this.leaving) {
@@ -99,19 +111,23 @@ var Visitor = (function (_WalkingSprite) {
 				VisitorManager.kill(this);
 			} else {
 				if (!this.arrivedAtSite) this.arrivedAtSite = Date.now();
+				if (!this.plantsSeen) this.plantsSeen = 0;
 
 				if (game.time.elapsedSecondsSince(this.arrivedAtSite) >= _.sample([1, 2])) {
 
-					var p = _.sample(Garden.getLivePlants());
-					if (p) {
-						console.log("Visitor next path", this, p);
-						game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
-						this.arrivedAtSite = null;
-					} else if (Garden.getLivePlants().length == 0) {
-						// no live plants?
-						//leave this garden!
-						this.leaving = true;
-						game.pathfinder.findPath(this, null, this.sprite.x, this.sprite.y, 1, 150);
+					if (this.plantsSeen == _.sample([1, 2])) {
+						this.leave();
+					} else {
+						var p = _.sample(Garden.getLivePlants());
+						if (p) {
+							console.log("Visitor next path", this, p);
+							game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
+							this.arrivedAtSite = null;
+						} else if (Garden.getLivePlants().length == 0) {
+							// no live plants?
+							this.leave();
+						}
+						this.plantsSeen++;
 					}
 				} else {
 					this.sprite.animations.stop();

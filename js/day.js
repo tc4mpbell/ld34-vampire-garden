@@ -1,10 +1,18 @@
 class DayManager {
 
+	static init() {
+		this.day = 1;
+		this.time = game.make.text(800, 30, '',  { font: "18px Arial", fill: "#ddd" });
+        game.textGroup.add(this.time);
+	}
+
 	static update() {
 		// checks to see if we're at the end of the day
 		if(!this.startOfDay) this.startOfDay = Date.now();
 
-		if(game.time.elapsedSecondsSince(this.startOfDay) >= 10) {
+		this.time.text = parseInt(game.time.elapsedSecondsSince(this.startOfDay));
+
+		if(game.time.elapsedSecondsSince(this.startOfDay) >= 3) {
 			console.log("NEW DAY");
 			this.startOfDay = Date.now();
 			DayManager.endDay();
@@ -35,7 +43,9 @@ class DayManager {
 			// VisitorManager.addVisitor();
 
 			VampireManager.bringPendingVampiresToLife();
-			VisitorManager.killAll();
+			//VisitorManager.killAll();
+
+			
 		});
 	}
 
@@ -51,19 +61,20 @@ class DayManager {
         var s = game.add.tween(game.spr_bg);
         s.to({ alpha: 1 }, 500, null);
         s.onComplete.add(onComplete);
-        s.onComplete.add(DayManager.fadeIn, this);
+        s.yoyo(true);
+        //s.onComplete.add(DayManager.fadeIn, this);
         s.start();
 	}
-	static fadeIn() {
-		console.log("fadein:");
-	        // game.spr_bg = game.add.graphics(0, 0);
-	        // game.spr_bg.beginFill("0x000", 1);
-	        // game.spr_bg.drawRect(0, 0, game.width, game.height);
-	        // game.spr_bg.alpha = 1;
-	        // game.spr_bg.endFill();
+	// static fadeIn() {
+	// 	console.log("fadein:");
+	//         // game.spr_bg = game.add.graphics(0, 0);
+	//         // game.spr_bg.beginFill("0x000", 1);
+	//         // game.spr_bg.drawRect(0, 0, game.width, game.height);
+	//         // game.spr_bg.alpha = 1;
+	//         // game.spr_bg.endFill();
 
-	        var s = game.add.tween(game.spr_bg);
-	        s.to({ alpha: 0 }, 600, null);
-	        s.start();
-	}
+	//         var s = game.add.tween(game.spr_bg);
+	//         s.to({ alpha: 0 }, 600, null);
+	//         s.start();
+	// }
 }
