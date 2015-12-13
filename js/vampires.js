@@ -27,35 +27,92 @@ class Vampire {
 		this.plantsToWater = [];
 		this.paths = [];
 		this.curPath = null;
+		this.plantsToWaterIx = 0;
+		this.waterLevel = 1;
+		this.goingToFountain = false;
+		this.id = _.uniqueId();
 
 		this.pathIx = 1;
 		for(var i = 0; i < 2 * Stats.efficiency; i++) {
 			// pick some unwatered plants
 			var plant = Garden.findUnassignedPlant();
-			this.plantsToWater.push(plant);
+			if(plant) {
+				this.addPlant(plant);
+			}
 		}
 
-		this.sprite = game.add.sprite(128, 64+128, 'vampire', 0);
+		this.sprite = game.add.sprite(500, 200, 'vampire', 0, game.characterGroup);
 		this.sprite.animations.add('walk', [0, 1], 8, true);
 
-		this.sprite.tint = 0x86bfda;
-		this.sprite.anchor.set(0.5);
+		//this.sprite.tint = 0x86bfda;
+		this.sprite.anchor.set(0.5, 0.5);
 		game.physics.arcade.enable(this.sprite);
 		this.sprite.body.collideWorldBounds = true;
 
 		this.speed = 100;
 	}
 
+	roomForPlants() {
+		return !this.plantsToWater || this.plantsToWater.length < 2 * Stats.efficiency;
+	}
+
+	addPlant(p) {
+		p.assignVampire(this);
+	}
+
+	setCurPath(path) {
+
+		this.curPath = path;
+		this.findingPath = false;
+
+		console.log("FOUND PATH 1", this.curPath);
+	}
+
+	nextPath() {
+		if(!this.curPath && !this.goingToFountain && this.plantsToWater.length > 0) {
+			// should alternate watering with going to fountain
+			// or maybe can water x plants before need refill...
+			if(this.waterLevel <= 0) {
+				// need to return to the fountain!
+				this.goingToFountain = true;
+				game.pathfinder.findPath(this, game.fountain, this.sprite.x, this.sprite.y, game.fountain.x, game.fountain.y);
+			} else {
+				this.goingToFountain = false;
+				
+				//get water plant path
+				var p = this.plantsToWater[this.plantsToWaterIx];
+
+				//console.log("NEXT PATH FOR VAMP", this.id, this);
+
+				console.log("WATERING", this.plantsToWaterIx);
+
+				if(this.plantsToWaterIx && this.plantsToWaterIx >= this.plantsToWater.length - 1)
+					this.plantsToWaterIx = 0;
+				else
+					this.plantsToWaterIx++;
+
+
+				if(p) {
+					
+					game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
+				}
+			}
+		}
+	}
+
 	update() {
+		//console.log("This vampires paths", this.paths);
 		// cycle through paths
 		//_.each(this.paths, function(path) {
 		if(this.curPath) {
+			this.findingPath = false;
+			//console.log("WE HAVE A PATH");
 			if(!this.pathIx) this.pathIx = 1;
 
-			console.log("PATH", this.curPath);
+			//console.log("PATH", this.curPath);
 
 			var dir = game.pathfinder.getDirection(this.curPath.path, this.sprite, this.pathIx);
-			console.log("DIR", dir, this.sprite.body);
+			//console.log("DIR", dir, this.sprite.body);
 
 			if (dir == "N") {
 	        	this.sprite.body.velocity.x = -this.speed;
@@ -98,6 +155,7 @@ class Vampire {
 	        }
 	        else if (dir == "STOP")
 	        {
+	        	this.sprite.animations.stop();
 	        	this.sprite.body.velocity.x = 0;
 	        	this.sprite.body.velocity.y = 0;
 	        }
@@ -107,23 +165,55 @@ class Vampire {
 	        	this.sprite.body.velocity.y = 0;
 	        }
 
-	        if(dir == "STOP" && this.pathIx < this.curPath.path.length - 1) {
+	        if(dir && dir != 'STOP') {
+	        	this.sprite.animations.play("walk");
+	        } else if(dir == "STOP" && this.pathIx < this.curPath.path.length - 1) {
 		        this.pathIx ++;
 		    } else if(dir == "STOP") {
 		    	// END OF PATH
-		    	this.curPath.destination.water();
+		    	//console.log("goingToFountain", this.goingToFountain);
+		    	if(this.goingToFountain) {
+		    		// REFILL WATER
+		    		this.goingToFountain = false;
+		    		this.waterLevel = 1;
+		    	} else {
+			    	this.curPath.destination.water();
+
+			    	this.waterLevel--; //decreme
+			    }
+		    	this.curPath = null;
+		    	this.pathIx = 1;
 		    }
+		} else if(!this.findingPath) {
+			//console.log(this.id, this.plantsToWater.length, this.curPath);
+			//this.findingPath = true;
+			this.nextPath();
 		}
 		//}, this);
 
-		if(!this.curPath && this.paths.length > 0) {
-			// pick a path!
-			this.curPath = this.paths.pop();
-		} else if(this.paths.length <= 0 && this.plantsToWater.length > 0) {
-			_.each(this.plantsToWater, function(p) {
-				game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
-			}, this);
-		}
+
+		// if(!this.curPath && this.paths.length == this.plantsToWater.length) {
+		// 	// pick a path!
+		// 	if(this.curPathIx >= this.paths.length - 1) 
+		// 		this.curPathIx = 0;
+		// 	else 
+		// 		this.curPathIx ++;
+
+		// 	this.curPath = this.paths[this.curPathIx];
+
+		// } else if(this.paths.length <= 0 && this.plantsToWater.length > 0 && this.paths.length < this.plantsToWater.length) {
+		// 	console.log("plantsToWater", this.plantsToWater);
+		// 	//this.paths = [];
+		// 	_.each(this.plantsToWater, function(p) {
+		// 		if(!_.find(this.paths, function(path) { return path.destination.id == p.id; })) {
+		// 			console.log("FIND A PATH FORRRRRR", p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
+		// 			game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
+		// 		}
+		// 	}, this);
+
+		// 	//console.log("curpath", this.paths);
+
+		// }
 	}
 
 }

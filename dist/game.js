@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
+var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
 (function () {
   //'use strict';
   function Game() {}
@@ -12,16 +12,20 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
     plantLayer: null,
     map: null,
     preload: function preload() {
-      game.load.image('tile', 'assets/test/tile.png');
-      game.load.image('cube', 'assets/test/cube.png');
+      // game.load.image('tile', 'assets/test/tile.png');
+      // game.load.image('cube', 'assets/test/cube.png');
       game.load.spritesheet('vampire', 'assets/char/iso_vamp.png', 33, 56);
+
+      game.stage.smoothed = false;
 
       game.renderer.renderSession.roundPixels = false;
 
       game.load.tilemap('garden', 'assets/tilemaps/maps/garden.json', null, Phaser.Tilemap.TILED_JSON);
-      game.load.image('garden_tiles', 'assets/tilemaps/tiles/garden.png');
+      game.load.image('garden_tiles', 'assets/tilemaps/tiles/dirt.png');
 
       game.load.spritesheet('plant', 'assets/tilemaps/tiles/plants.png', 16, 16);
+
+      game.load.spritesheet('fountain', 'assets/tilemaps/tiles/fountain.png', 64, 64);
 
       // spritesheets
       //game.load.spritesheet('vampire', 'assets/char/vampire.png', 16, 24);
@@ -53,12 +57,19 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       //  A Layer is effectively like a Phaser.Sprite, so is added to the display list.
       game.plantLayer = game.map.createLayer('Tile Layer 1');
 
+      game.groundGroup = game.add.group();
+      game.characterGroup = game.add.group();
+
       console.log("game.map", game.map);
 
       //  This resizes the game world to match the layer dimensions
       game.plantLayer.resizeWorld();
 
-      //game.character = player = game.add.sprite(128+64, 64+128, 'vampire', 0);
+      game.fountain = game.add.sprite(300, 300, 'fountain', groundGroup);
+      game.fountain.scale.setTo(6);
+      game.physics.arcade.enable(game.fountain);
+
+      //game.character = player =
 
       //////////
 
@@ -81,9 +92,11 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       //game.iso.unproject(game.input.activePointer.position, cursorPos);
       var cursorPos = game.input.activePointer.position;
 
+      Garden.highlightTile(cursorPos.x, cursorPos.y);
       // // Loop through all tiles and test to see if the 3D position from above intersects with the automatically generated IsoSprite tile bounds.
-      // groundGroup.forEach(function (tile) {
-      //     var inBounds = tile.bounds.containsXY(cursorPos.x, cursorPos.y);
+      // _.each(game.map.layers[0].data, function (tile) {
+      //   console.log(tile);
+      //     var inBounds = tile.containsPoint(cursorPos.x, cursorPos.y);
       //     // If it does, do a little animation and tint change.
       //     if (!tile.selected && inBounds) {
       //         tile.selected = true;
@@ -125,8 +138,6 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       //     player.body.velocity.x = 0;
       // }
 
-      if (game.input.activePointer.isDown) {}
-
       DayManager.update();
       VampireManager.update();
     },
@@ -167,6 +178,7 @@ var game = new Phaser.Game("100%", 600, Phaser.CANVAS, 'LD34');
       // game.characterTween = this.game.add.tween(game.character.body).to({x: game.character.targetX, y: game.character.targetY}, duration, Phaser.Easing.Linear.None, true);
       // //game.characterTween.onComplete.add(function() {game.character.animations.stop()}, this);
     }
+
   };
 
   game.state.add('game', Game);

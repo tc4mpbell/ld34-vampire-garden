@@ -15,7 +15,7 @@ var Pathfinder = (function () {
 
     this.easystar.setIterationsPerCalculation(1000);
 
-    this.easystar.setAcceptableTiles([2]);
+    this.easystar.setAcceptableTiles([1]);
     //this.easystar.enableCornerCutting();
     this.easystar.enableDiagonals();
 
@@ -50,44 +50,44 @@ var Pathfinder = (function () {
 
       var currentNextPointX, currentNextPointY;
       if (path) {
-        console.log("Get getDirection", path, ix);
+        //console.log("Get getDirection", path, ix);
         currentNextPointX = path[ix].x;
         currentNextPointY = path[ix].y;
       }
 
-      console.log(currentNextPointX, spriteTileX, currentNextPointY, spriteTileY);
+      //console.log(currentNextPointX, spriteTileX, currentNextPointY, spriteTileY);
 
       if (currentNextPointX < spriteTileX && currentNextPointY < spriteTileY) {
         // left up
-        console.log("GO LEFT UP");
+        //console.log("GO LEFT UP");
         return "NW";
       } else if (currentNextPointX == spriteTileX && currentNextPointY < spriteTileY) {
         // up
-        console.log("GO UP");
+        //console.log("GO UP");
         return "N";
       } else if (currentNextPointX > spriteTileX && currentNextPointY < spriteTileY) {
         // right up
-        console.log("GO RIGHT UP");
+        //console.log("GO RIGHT UP");
         return "NE";
       } else if (currentNextPointX < spriteTileX && currentNextPointY == spriteTileY) {
         // left
-        console.log("GO LEFT");
+        //console.log("GO LEFT");
         return "W";
       } else if (currentNextPointX > spriteTileX && currentNextPointY == spriteTileY) {
         // right
-        console.log("GO RIGHT");
+        //console.log("GO RIGHT");
         return "E";
       } else if (currentNextPointX > spriteTileX && currentNextPointY > spriteTileY) {
         // right down
-        console.log("GO RIGHT DOWN");
+        //console.log("GO RIGHT DOWN");
         return "SE";
       } else if (currentNextPointX == spriteTileX && currentNextPointY > spriteTileY) {
         // down
-        console.log("GO DOWN");
+        //console.log("GO DOWN");
         return "S";
       } else if (currentNextPointX < spriteTileX && currentNextPointY > spriteTileY) {
         // left down
-        console.log("GO LEFT DOWN");
+        //console.log("GO LEFT DOWN");
         return "SW";
       } else {
         return "STOP";
@@ -101,20 +101,21 @@ var Pathfinder = (function () {
       var targetTileX = Math.floor(toX / 128);
       var targetTileY = Math.floor(toY / 128);
 
-      console.log(fromTileY, fromTileY, targetTileX, targetTileY);
+      //console.log(fromTileY, fromTileY, targetTileX, targetTileY);
 
       this.easystar.findPath(fromTileX, fromTileY, targetTileX, targetTileY, function (path) {
         if (path === null) {
           console.log("The path to the destination point was not found.");
         }
 
-        if (path) {
+        if (path && path.length > 0) {
           var pathObj = {
             destination: entityDestination,
             path: path
           };
-          entity.paths.push(pathObj); //[entityPathName] = path;
-          console.log(pathObj);
+          console.log("CALLING", entity.setCurPath, path);
+          entity.setCurPath(pathObj); //.paths.push(pathObj); //[entityPathName] = path;
+          //entity.paths.push(pathObj); //[entityPathName] = path;
         }
 
         // if (enemyDirection != "STOP") cowboy.animations.play(enemyDirection);
