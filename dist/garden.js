@@ -18,6 +18,13 @@ var Garden = (function () {
 		value: function getPlants() {
 			return this.plants;
 		}
+	}, {
+		key: "getLivePlants",
+		value: function getLivePlants() {
+			return _.filter(this.plants, function (p) {
+				return p.sprite.alive;
+			});
+		}
 
 		// TODO
 
@@ -36,8 +43,8 @@ var Garden = (function () {
 			if (!this.plantMap) this.plantMap = {}; //stores locs where plants are in this game
 
 			var marker = {};
-			marker.x = game.plantLayer.getTileX(game.input.activePointer.worldX) * 128;
-			marker.y = game.plantLayer.getTileY(game.input.activePointer.worldY) * 128;
+			marker.x = game.plantLayer.getTileX(game.input.activePointer.worldX) * game.tileSize;
+			marker.y = game.plantLayer.getTileY(game.input.activePointer.worldY) * game.tileSize;
 
 			if (this.validPlantPos(marker.x, marker.y)) {
 				// adds at mouse position
@@ -64,13 +71,13 @@ var Garden = (function () {
 		value: function highlightTile(x, y) {
 			if (!this.highlighting) this.highlighting = {};
 
-			var mx = game.plantLayer.getTileX(x) * 128;
-			var my = game.plantLayer.getTileX(y) * 128;
+			var mx = game.plantLayer.getTileX(x) * game.tileSize;
+			var my = game.plantLayer.getTileX(y) * game.tileSize;
 
 			if (!this.highlighting[x + "-" + y] && this.validPlantPos(mx, my)) {
 				game.highlightedTile = game.add.graphics(0, 0);
 				game.highlightedTile.beginFill("0xffffff", 0.4);
-				game.highlightedTile.drawRect(mx, my, 128, 128);
+				game.highlightedTile.drawRect(mx, my, game.tileSize, game.tileSize);
 				game.highlightedTile.alpha = 0;
 				game.highlightedTile.endFill();
 
@@ -79,6 +86,8 @@ var Garden = (function () {
 				var s = game.add.tween(game.highlightedTile);
 				s.to({ alpha: 0.1 }, 200, null, true, 0, 0, true);
 				s.start();
+
+				game.groundGroup.add(game.highlightedTile);
 			}
 		}
 	}]);
@@ -116,7 +125,7 @@ var Plant = (function () {
 		//game.map.putTile(tile, tileX, tileY, game.plantLayer);
 
 		this.sprite = game.add.sprite(x, y, 'plant', 0, game.groundGroup);
-		this.sprite.scale.setTo(8, 8);
+		this.sprite.scale.setTo(6, 6);
 
 		this.planted = Date.now();
 
@@ -167,8 +176,8 @@ var Plant = (function () {
 			if (this.sprite.alive) {
 				console.log("Watered", this);
 				this.health = 4;
-				this.updateHealthStatus();
 				this.sprite.frame = 1;
+				this.updateHealthStatus();
 			}
 		}
 	}, {

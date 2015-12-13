@@ -16,8 +16,8 @@ var Pathfinder = (function () {
     this.easystar.setIterationsPerCalculation(1000);
 
     this.easystar.setAcceptableTiles([1]);
-    //this.easystar.enableCornerCutting();
-    this.easystar.enableDiagonals();
+    this.easystar.enableCornerCutting();
+    //this.easystar.enableDiagonals();
 
     this.updateGrid();
   }
@@ -43,16 +43,20 @@ var Pathfinder = (function () {
     value: function getDirection(path, sprite) {
       var ix = arguments.length <= 2 || arguments[2] === undefined ? 1 : arguments[2];
 
-      var spriteTileX = Math.floor(sprite.x / 128);
-      var spriteTileY = Math.floor(sprite.y / 128);
-      // var targetTileX = Math.floor(toX/128);
-      // var targetTileY = Math.floor(toY/128);
+      var spriteTileX = Math.floor(sprite.x / game.tileSize);
+      var spriteTileY = Math.floor(sprite.y / game.tileSize);
+      // var targetTileX = Math.floor(toX/game.tileSize);
+      // var targetTileY = Math.floor(toY/game.tileSize);
 
       var currentNextPointX, currentNextPointY;
-      if (path) {
+      if (path && path.length > 0) {
         //console.log("Get getDirection", path, ix);
-        currentNextPointX = path[ix].x;
-        currentNextPointY = path[ix].y;
+        try {
+          currentNextPointX = path[ix].x;
+          currentNextPointY = path[ix].y;
+        } catch (e) {
+          return false;
+        }
       }
 
       //console.log(currentNextPointX, spriteTileX, currentNextPointY, spriteTileY);
@@ -60,33 +64,41 @@ var Pathfinder = (function () {
       if (currentNextPointX < spriteTileX && currentNextPointY < spriteTileY) {
         // left up
         //console.log("GO LEFT UP");
+        sprite.scale.x = -1;
         return "NW";
       } else if (currentNextPointX == spriteTileX && currentNextPointY < spriteTileY) {
         // up
+        sprite.scale.x = 1;
         //console.log("GO UP");
         return "N";
       } else if (currentNextPointX > spriteTileX && currentNextPointY < spriteTileY) {
         // right up
+        sprite.scale.x = 1;
         //console.log("GO RIGHT UP");
         return "NE";
       } else if (currentNextPointX < spriteTileX && currentNextPointY == spriteTileY) {
         // left
+        sprite.scale.x = -1;
         //console.log("GO LEFT");
         return "W";
       } else if (currentNextPointX > spriteTileX && currentNextPointY == spriteTileY) {
         // right
+        sprite.scale.x = 1;
         //console.log("GO RIGHT");
         return "E";
       } else if (currentNextPointX > spriteTileX && currentNextPointY > spriteTileY) {
         // right down
+        sprite.scale.x = 1;
         //console.log("GO RIGHT DOWN");
         return "SE";
       } else if (currentNextPointX == spriteTileX && currentNextPointY > spriteTileY) {
         // down
+        sprite.scale.x = 1;
         //console.log("GO DOWN");
         return "S";
       } else if (currentNextPointX < spriteTileX && currentNextPointY > spriteTileY) {
         // left down
+        sprite.scale.x = -1;
         //console.log("GO LEFT DOWN");
         return "SW";
       } else {
@@ -96,10 +108,10 @@ var Pathfinder = (function () {
   }, {
     key: "findPath",
     value: function findPath(entity, entityDestination, fromX, fromY, toX, toY) {
-      var fromTileX = Math.floor(fromX / 128);
-      var fromTileY = Math.floor(fromY / 128);
-      var targetTileX = Math.floor(toX / 128);
-      var targetTileY = Math.floor(toY / 128);
+      var fromTileX = Math.floor(fromX / game.tileSize);
+      var fromTileY = Math.floor(fromY / game.tileSize);
+      var targetTileX = Math.floor(toX / game.tileSize);
+      var targetTileY = Math.floor(toY / game.tileSize);
 
       //console.log(fromTileY, fromTileY, targetTileX, targetTileY);
 
@@ -113,8 +125,9 @@ var Pathfinder = (function () {
             destination: entityDestination,
             path: path
           };
-          console.log("CALLING", entity.setCurPath, path);
-          entity.setCurPath(pathObj); //.paths.push(pathObj); //[entityPathName] = path;
+          if (!entity.curPath) {
+            entity.setCurPath(pathObj); //.paths.push(pathObj); //[entityPathName] = path;
+          }
           //entity.paths.push(pathObj); //[entityPathName] = path;
         }
 

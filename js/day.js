@@ -4,7 +4,7 @@ class DayManager {
 		// checks to see if we're at the end of the day
 		if(!this.startOfDay) this.startOfDay = Date.now();
 
-		if(game.time.elapsedSecondsSince(this.startOfDay) >= 3) {
+		if(game.time.elapsedSecondsSince(this.startOfDay) >= 10) {
 			console.log("NEW DAY");
 			this.startOfDay = Date.now();
 			DayManager.endDay();
@@ -31,9 +31,12 @@ class DayManager {
 			});
 
 			// DEBUG
-			VampireManager.hireVampire();
-		});
+			//VampireManager.hireVampire();
+			// VisitorManager.addVisitor();
 
+			VampireManager.bringPendingVampiresToLife();
+			VisitorManager.killAll();
+		});
 	}
 
 	static fadeOut(onComplete) {

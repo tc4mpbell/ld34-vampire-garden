@@ -8,8 +8,8 @@ class Pathfinder {
 		this.easystar.setIterationsPerCalculation(1000); 
 
 		this.easystar.setAcceptableTiles([1]);
-		//this.easystar.enableCornerCutting();
-		this.easystar.enableDiagonals();
+		this.easystar.enableCornerCutting();
+		//this.easystar.enableDiagonals();
 
     this.updateGrid();
 	}	
@@ -31,16 +31,21 @@ class Pathfinder {
 
 
 	getDirection(path, sprite, ix=1) {
-    var spriteTileX = Math.floor(sprite.x/128);
-    var spriteTileY =  Math.floor(sprite.y/128);
-    // var targetTileX = Math.floor(toX/128);
-    // var targetTileY = Math.floor(toY/128);
+    var spriteTileX = Math.floor(sprite.x/game.tileSize);
+    var spriteTileY =  Math.floor(sprite.y/game.tileSize);
+    // var targetTileX = Math.floor(toX/game.tileSize);
+    // var targetTileY = Math.floor(toY/game.tileSize);
 
     var currentNextPointX, currentNextPointY;
-		if (path) {
+		if (path && path.length > 0) {
           //console.log("Get getDirection", path, ix);
-        	currentNextPointX = path[ix].x;
-          currentNextPointY = path[ix].y;
+          try {
+          	currentNextPointX = path[ix].x;
+            currentNextPointY = path[ix].y;
+          } 
+          catch(e) {
+            return false;
+          }
     }
 
       //console.log(currentNextPointX, spriteTileX, currentNextPointY, spriteTileY);
@@ -49,47 +54,55 @@ class Pathfinder {
       {
         // left up
           //console.log("GO LEFT UP");
+          sprite.scale.x = -1;
           return "NW";
       }
       else if (currentNextPointX == spriteTileX && currentNextPointY < spriteTileY)
       {
         // up
+        sprite.scale.x = 1;
           //console.log("GO UP");
           return "N";
         }
       else if (currentNextPointX > spriteTileX && currentNextPointY < spriteTileY)
       {
         // right up
+          sprite.scale.x = 1;
           //console.log("GO RIGHT UP");
           return "NE";
         }
       else if (currentNextPointX < spriteTileX && currentNextPointY == spriteTileY)
       {
         // left
+        sprite.scale.x = -1;
           //console.log("GO LEFT");
           return "W";
         }
       else if (currentNextPointX > spriteTileX && currentNextPointY == spriteTileY)
       {
         // right
+        sprite.scale.x = 1;
           //console.log("GO RIGHT");
           return "E";
       }
       else if (currentNextPointX > spriteTileX && currentNextPointY > spriteTileY)
       {
         // right down
+        sprite.scale.x = 1;
           //console.log("GO RIGHT DOWN");
           return "SE";
         }
       else if (currentNextPointX == spriteTileX && currentNextPointY > spriteTileY)
       {
         // down
+        sprite.scale.x = 1;
           //console.log("GO DOWN");
           return "S";
         }
       else if (currentNextPointX < spriteTileX && currentNextPointY > spriteTileY)
       {
         // left down
+        sprite.scale.x = -1;
           //console.log("GO LEFT DOWN");
           return "SW";
         }
@@ -101,30 +114,30 @@ class Pathfinder {
 
 
 	findPath(entity, entityDestination, fromX,fromY, toX, toY) {
-		var fromTileX = Math.floor(fromX/128);
-		var fromTileY =  Math.floor(fromY/128);
-		var targetTileX = Math.floor(toX/128);
-		var targetTileY = Math.floor(toY/128);
+		var fromTileX = Math.floor(fromX/game.tileSize);
+		var fromTileY =  Math.floor(fromY/game.tileSize);
+		var targetTileX = Math.floor(toX/game.tileSize);
+		var targetTileY = Math.floor(toY/game.tileSize);
 
     //console.log(fromTileY, fromTileY, targetTileX, targetTileY);
 
-
 		this.easystar.findPath(fromTileX, fromTileY, targetTileX, targetTileY, function( path ) {
-            if (path === null) {
-                console.log("The path to the destination point was not found.");
-            } 
+          if (path === null) {
+              console.log("The path to the destination point was not found.");
+          } 
 
-            if (path && path.length > 0) {
-              var pathObj = {
-                destination: entityDestination,
-                path: path
-              };
-              console.log("CALLING", entity.setCurPath, path);
+          if (path && path.length > 0) {
+            var pathObj = {
+              destination: entityDestination,
+              path: path
+            };
+            if(!entity.curPath) {
               entity.setCurPath(pathObj);//.paths.push(pathObj); //[entityPathName] = path;
-	        	  //entity.paths.push(pathObj); //[entityPathName] = path;
+            }
+        	  //entity.paths.push(pathObj); //[entityPathName] = path;
 	        }
-            
-            // if (enemyDirection != "STOP") cowboy.animations.play(enemyDirection);
+          
+          // if (enemyDirection != "STOP") cowboy.animations.play(enemyDirection);
         });
         this.easystar.calculate();
 	}
