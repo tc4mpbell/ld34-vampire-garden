@@ -23,11 +23,12 @@ class VisitorManager {
 		}
 	}
 
-	static killAll() {
+	static escortAllOut() {
 		if(this.visitors && this.visitors.length > 0) {
 			_.each(this.visitors, function(v) {
 				if(v) {
-					v.sprite.kill();
+					v.sprite.speed = 430;
+					v.leave();
 				}
 			});
 		}
@@ -67,6 +68,7 @@ class Visitor extends WalkingSprite {
 	}
 
 	leave() {
+		this.curPath = null;
 		//leave this garden!
 		this.leaving = true;
 		this.findingPath = true;
@@ -74,7 +76,7 @@ class Visitor extends WalkingSprite {
 	}
 
 	nextPath() {
-		if(this.leaving) {
+		if(this.leaving && !this.findingPath) {
 			// arrived at 1,1 -- kill this sprite
 			
 			VisitorManager.kill(this);

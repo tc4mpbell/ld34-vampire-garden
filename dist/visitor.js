@@ -39,12 +39,13 @@ var VisitorManager = (function () {
 			}
 		}
 	}, {
-		key: 'killAll',
-		value: function killAll() {
+		key: 'escortAllOut',
+		value: function escortAllOut() {
 			if (this.visitors && this.visitors.length > 0) {
 				_.each(this.visitors, function (v) {
 					if (v) {
-						v.sprite.kill();
+						v.sprite.speed = 430;
+						v.leave();
 					}
 				});
 			}
@@ -97,6 +98,7 @@ var Visitor = (function (_WalkingSprite) {
 	}, {
 		key: 'leave',
 		value: function leave() {
+			this.curPath = null;
 			//leave this garden!
 			this.leaving = true;
 			this.findingPath = true;
@@ -105,7 +107,7 @@ var Visitor = (function (_WalkingSprite) {
 	}, {
 		key: 'nextPath',
 		value: function nextPath() {
-			if (this.leaving) {
+			if (this.leaving && !this.findingPath) {
 				// arrived at 1,1 -- kill this sprite
 
 				VisitorManager.kill(this);

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -10,7 +10,7 @@ var WalkingSprite = (function () {
 	}
 
 	_createClass(WalkingSprite, [{
-		key: "recalcPath",
+		key: 'recalcPath',
 		value: function recalcPath() {
 			if (this.curPath) {
 				var p = this.curPath.destination;
@@ -25,7 +25,7 @@ var WalkingSprite = (function () {
 			}
 		}
 	}, {
-		key: "update",
+		key: 'update',
 		value: function update() {
 			//game.physics.arcade.overlap(this.sprite, game.fountain, null, null, this);
 			game.physics.arcade.collide(this.sprite, game.fountain, function () {
@@ -50,10 +50,12 @@ var WalkingSprite = (function () {
 				//console.log("PATH", this.curPath);
 				var oldDir = this.curDir;
 				this.curDir = game.pathfinder.getDirection(this.curPath.path, this.sprite, this.pathIx);
-				//console.log("DIR", dir, this.sprite.body);
 
-				if (oldDir != this.curDir) {
-					this.sprite.body.scale *= -1; //flip
+				if (oldDir) {
+					if (_.contains(oldDir, 'W') && _.contains(this.curDir, 'E') || _.contains(oldDir, 'E') && _.contains(this.curDir, 'W')) {
+						console.log("SWAP DIR");
+						this.sprite.scale.x *= -1; //flip
+					}
 				}
 
 				if (this.curDir == "N") {

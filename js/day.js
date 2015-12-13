@@ -4,6 +4,8 @@ class DayManager {
 		this.day = 1;
 		this.time = game.make.text(800, 30, '',  { font: "18px Arial", fill: "#ddd" });
         game.textGroup.add(this.time);
+
+        this.state = 'DAY';
 	}
 
 	static update() {
@@ -23,6 +25,9 @@ class DayManager {
 		// var tweenDark = game.add.tween(game.world).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true,0,0,false);
 		// var tweenLight = game.add.tween(game.world).to({alpha: 1}, 500, Phaser.Easing.Linear.None, false);
 		// tweenDark.chain(tweenLight);
+		var that = this;
+		VisitorManager.escortAllOut();
+		
 		this.fadeOut(function() {
 
 			// Pay employees
@@ -43,10 +48,15 @@ class DayManager {
 			// VisitorManager.addVisitor();
 
 			VampireManager.bringPendingVampiresToLife();
-			//VisitorManager.killAll();
-
 			
+
+
+			that.state = 'NIGHT';			
 		});
+	}
+
+	static endNight() {
+
 	}
 
 	static fadeOut(onComplete) {

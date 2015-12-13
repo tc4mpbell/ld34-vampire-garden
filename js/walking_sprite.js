@@ -35,10 +35,13 @@ class WalkingSprite {
 			//console.log("PATH", this.curPath);
 			var oldDir = this.curDir;
 			this.curDir = game.pathfinder.getDirection(this.curPath.path, this.sprite, this.pathIx);
-			//console.log("DIR", dir, this.sprite.body);
+			
 
-			if(oldDir != this.curDir) {
-				this.sprite.body.scale *= -1; //flip
+			if(oldDir) {
+				if((_.contains(oldDir, 'W') && _.contains(this.curDir, 'E') )||( _.contains(oldDir, 'E') && _.contains(this.curDir, 'W'))) {
+					console.log("SWAP DIR");
+					this.sprite.scale.x *= -1; //flip
+				}
 			}
 
 			if (this.curDir == "N") {
