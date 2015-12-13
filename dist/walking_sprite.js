@@ -30,6 +30,9 @@ var WalkingSprite = (function () {
 			//game.physics.arcade.overlap(this.sprite, game.fountain, null, null, this);
 			game.physics.arcade.collide(this.sprite, game.fountain, function () {
 				console.log("******************** collide fountain ***");
+				if (this.collidedWithFountain) {
+					this.collidedWithFountain();
+				}
 				this.recalcPath();
 			}, null, this);
 

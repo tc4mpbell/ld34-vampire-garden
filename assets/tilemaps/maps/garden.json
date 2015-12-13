@@ -18,24 +18,24 @@
 
     },
  "renderorder":"right-down",
- "tileheight":16,
- "tilewidth":16,
+ "tileheight":96,
+ "tilewidth":96,
  "tilesets":[
         {
          "firstgid":1,
          "image":"garden.png",
-         "imageheight":32,
-         "imagewidth":16,
+         "imageheight":194,
+         "imagewidth":96,
          "margin":0,
          "name":"garden_tiles",
          "properties":
             {
 
             },
-         "spacing":1,
-         "tilecount":1,
-         "tileheight":16,
-         "tilewidth":16
+         "spacing":0,
+         "tilecount":2,
+         "tileheight":96,
+         "tilewidth":96
         }],
  
  "version":1,

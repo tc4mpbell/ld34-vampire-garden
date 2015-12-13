@@ -21,7 +21,7 @@ var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
       game.renderer.renderSession.roundPixels = false;
 
       game.load.tilemap('garden', 'assets/tilemaps/maps/garden.json', null, Phaser.Tilemap.TILED_JSON);
-      game.load.image('garden_tiles', 'assets/tilemaps/tiles/plants.png');
+      game.load.image('garden_tiles', 'assets/tilemaps/tiles/terrain.png');
 
       game.load.spritesheet('plant', 'assets/tilemaps/tiles/plants.png', 16, 16);
 
@@ -65,7 +65,7 @@ var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
       //  A Layer is effectively like a Phaser.Sprite, so is added to the display list.
       game.plantLayer = game.map.createLayer('Tile Layer 1');
 
-      game.plantLayer.scale.setTo(6);
+      //game.plantLayer.scale.setTo(6);
 
       game.groundGroup = game.add.group();
       game.characterGroup = game.add.group();

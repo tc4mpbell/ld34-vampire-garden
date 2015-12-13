@@ -89,7 +89,7 @@ class Plant {
     	//console.log("TILE", tileX, tileY, game.plantLayer);
         //game.map.putTile(tile, tileX, tileY, game.plantLayer);
 
-        this.sprite = game.add.sprite(x, y, 'plant',0, game.groundGroup);
+        this.sprite = game.add.sprite(x, y, 'plant',1, game.groundGroup);
         this.sprite.scale.setTo(6,6);
 
         this.planted = Date.now();
