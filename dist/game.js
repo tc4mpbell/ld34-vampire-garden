@@ -23,7 +23,7 @@ var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
       game.renderer.renderSession.roundPixels = false;
 
       game.load.tilemap('garden', 'assets/tilemaps/maps/garden.json', null, Phaser.Tilemap.TILED_JSON);
-      game.load.image('garden_tiles', 'assets/tilemaps/tiles/dirt.png');
+      game.load.image('garden_tiles', 'assets/tilemaps/tiles/plants.png');
 
       game.load.spritesheet('plant', 'assets/tilemaps/tiles/plants.png', 16, 16);
 
@@ -33,7 +33,7 @@ var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
       game.load.image('gate', 'assets/sprites/gate.png');
 
       // spritesheets
-      //game.load.spritesheet('vampire', 'assets/char/vampire.png', 16, 24);
+      //game.load.spritesheet('vampire', 'assets/char/vampire.png', 16, 24);     
 
       game.tileSize = 96;
     },
@@ -59,9 +59,13 @@ var game = new Phaser.Game("100%", "100%", Phaser.CANVAS, 'LD34');
       //  The second parameter maps this name to the Phaser.Cache key 'tiles'
       game.map.addTilesetImage('garden_tiles');
 
+      //game.map.scale.setTo(2);
+
       //  Creates a layer from the World1 layer in the map data.
       //  A Layer is effectively like a Phaser.Sprite, so is added to the display list.
       game.plantLayer = game.map.createLayer('Tile Layer 1');
+
+      game.plantLayer.scale.setTo(6);
 
       game.groundGroup = game.add.group();
       game.characterGroup = game.add.group();

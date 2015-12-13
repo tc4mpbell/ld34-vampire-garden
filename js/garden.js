@@ -128,7 +128,7 @@ class Plant {
 		}
 
 		this.sprite.alive = false;
-		this.sprite.frame = 5;
+		this.sprite.frame = 6;
 		console.log("dead");
 	}
 
@@ -136,7 +136,7 @@ class Plant {
 		if(this.sprite.alive) {
 			console.log("Watered", this);
 			this.health = 4;
-			this.sprite.frame = 1;
+			this.sprite.frame = 2;
 			this.updateHealthStatus();
 			
 		}
@@ -150,8 +150,8 @@ class Plant {
 		} else {
 			if(this.health == 1) {
 				console.log("dying");
-				this.sprite.frame = 4;
-			} else if(this.sprite.frame < 3) {
+				this.sprite.frame = 5;
+			} else if(this.sprite.frame < 4) {
 				console.log("alive", this.sprite.frame);
 				this.sprite.frame += 1;
 			}
