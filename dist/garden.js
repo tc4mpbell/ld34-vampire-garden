@@ -22,7 +22,14 @@ var Garden = (function () {
 		key: "getLivePlants",
 		value: function getLivePlants() {
 			return _.filter(this.plants, function (p) {
-				return p.sprite.alive;
+				return p.sprite.alive && p.sprite.frame != 9 && p.sprite.x > 0 && p.sprite.y > 0;
+			});
+		}
+	}, {
+		key: "getDeadPlants",
+		value: function getDeadPlants() {
+			return _.filter(this.plants, function (p) {
+				return !p.sprite.alive;
 			});
 		}
 
@@ -32,9 +39,13 @@ var Garden = (function () {
 		key: "findUnassignedPlant",
 		value: function findUnassignedPlant() {
 			//console.log("All plants", this.plants);
-			return _.find(this.plants, function (p) {
+			var unassignedPlants = _.sortBy(_.filter(this.plants, function (p) {
 				return p.vampire == null && p.health > 0;
+			}), function (p) {
+				if (p.sprite.frame == 9) return 0;else return p.health;
 			});
+			console.log("unassignedPlants", unassignedPlants);
+			return unassignedPlants[0]; //, function(p) { return p.vampire == null && p.health > 0; });
 		}
 	}, {
 		key: "addPlant",
@@ -46,23 +57,28 @@ var Garden = (function () {
 			marker.x = game.plantLayer.getTileX(game.input.activePointer.worldX) * game.tileSize;
 			marker.y = game.plantLayer.getTileY(game.input.activePointer.worldY) * game.tileSize;
 
-			if (this.validPlantPos(marker.x, marker.y)) {
+			if (this.validPlantPos(marker.x, marker.y) && Stats.money >= 1) {
 				// adds at mouse position
 				var p = new Plant(marker.x, marker.y);
 				this.plants.push(p);
 				console.log(this.plants);
 				this.plantMap[marker.x + "-" + marker.y] = true;
+
+				Stats.subtractMoney(1);
 			}
 		}
 	}, {
 		key: "validPlantPos",
 		value: function validPlantPos(x, y) {
 			if (!this.plantMap) this.plantMap = {}; //stores locs where plants are in this game
-
-			if (this.plantMap[x + "-" + y] || game.fountain.body.hitTest(game.input.activePointer.worldX, game.input.activePointer.worldY) || game.map.getTile(x / game.tileSize, y / game.tileSize).index != 1) {
+			try {
+				if (this.plantMap[x + "-" + y] || game.fountain.body.hitTest(game.input.activePointer.worldX, game.input.activePointer.worldY) || game.map.getTile(x / game.tileSize, y / game.tileSize).index != 1) {
+					return false;
+				} else {
+					return true;
+				}
+			} catch (e) {
 				return false;
-			} else {
-				return true;
 			}
 		}
 	}, {
@@ -123,15 +139,16 @@ var Plant = (function () {
 		//console.log("TILE", tileX, tileY, game.plantLayer);
 		//game.map.putTile(tile, tileX, tileY, game.plantLayer);
 
-		this.sprite = game.add.sprite(x, y, 'plant', 1, game.groundGroup);
+		this.sprite = game.add.sprite(x, y, 'plant', 9, game.groundGroup);
 		this.sprite.scale.setTo(game.scaleFactor / 1.5);
+		this.sprite.alive = true;
 
 		this.planted = Date.now();
 
 		// Update level
 		game.pathfinder.updateGrid();
 
-		this.assignVampire();
+		//this.assignVampire();
 	}
 
 	_createClass(Plant, [{
@@ -139,24 +156,24 @@ var Plant = (function () {
 		value: function isAssignedToVampire() {
 			return this.vampire;
 		}
-	}, {
-		key: "assignVampire",
-		value: function assignVampire(v) {
-			if (v) {
-				this.vampire = v;
-			} else {
-				// no vamp passed, find one that has a slot
-				v = _.find(VampireManager.getVampires(), function (v) {
-					return v.roomForPlants();
-				});
-				this.vampire = v;
-			}
 
-			if (this.vampire) {
-				this.vampire.plantsToWater.push(this);
-				console.log("my vampire", this.vampire);
-			}
-		}
+		// assignVampire(v) {
+		// 	if(v) {
+		// 		this.vampire = v;
+		// 	} else {
+		// 		// no vamp passed, find one that has a slot
+		// 		v = _.find(VampireManager.getVampires(), function(v) {
+		// 			return v.roomForPlants();
+		// 		});
+		// 		this.vampire = v;			
+		// 	}
+
+		// 	if(this.vampire) {
+		// 		this.vampire.plantsToWater.push(this);
+		// 		console.log("my vampire", this.vampire);
+		// 	}
+		// }
+
 	}, {
 		key: "kill",
 		value: function kill() {
@@ -172,11 +189,17 @@ var Plant = (function () {
 	}, {
 		key: "water",
 		value: function water() {
-			if (this.sprite.alive) {
-				console.log("Watered", this);
+			this.vampire = null;
+			if (this.health > 0) {
 				this.health = 4;
-				this.sprite.frame = 2;
-				this.updateHealthStatus();
+				console.log("Watered", this);
+				if (this.sprite.frame == 9) {
+					// just planted
+					this.sprite.frame = 1;
+				} else {
+					this.sprite.frame = 2;
+				}
+				//this.updateHealthStatus();
 			}
 		}
 	}, {
@@ -187,10 +210,12 @@ var Plant = (function () {
 			if (this.health <= 0) {
 				this.kill();
 			} else {
+
+				console.log("dec'd health", this.health);
 				if (this.health == 1) {
 					console.log("dying");
 					this.sprite.frame = 5;
-				} else if (this.sprite.frame < 4) {
+				} else if (this.sprite.frame < 5) {
 					console.log("alive", this.sprite.frame);
 					this.sprite.frame += 1;
 				}

@@ -15,9 +15,9 @@ var Pathfinder = (function () {
 
     this.easystar.setIterationsPerCalculation(1000);
 
-    this.easystar.setAcceptableTiles([1, 9]);
+    this.easystar.setAcceptableTiles([0, 1, 9]);
     this.easystar.enableCornerCutting();
-    //this.easystar.enableDiagonals();
+    this.easystar.enableDiagonals();
 
     this.updateGrid();
   }
@@ -104,14 +104,19 @@ var Pathfinder = (function () {
     value: function findPath(entity, entityDestination, fromX, fromY, toX, toY) {
       var fromTileX = Math.floor(fromX / game.tileSize);
       var fromTileY = Math.floor(fromY / game.tileSize);
-      var targetTileX = Math.floor(toX / game.tileSize);
-      var targetTileY = Math.floor(toY / game.tileSize);
+      var targetTileX = Math.ceil(toX / game.tileSize);
+      var targetTileY = Math.ceil(toY / game.tileSize);
+
+      console.log("Path???", fromTileX, fromTileY, toX, targetTileX, toY, targetTileY);
 
       //console.log(fromTileY, fromTileY, targetTileX, targetTileY);
 
       this.easystar.findPath(fromTileX, fromTileY, targetTileX, targetTileY, function (path) {
         if (path === null) {
           console.log("The path to the destination point was not found.");
+          if (entity.pathFailed) {
+            entity.pathFailed();
+          }
         }
 
         if (path && path.length > 0) {

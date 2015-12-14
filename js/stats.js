@@ -25,8 +25,15 @@ class Stats {
     }
 
     static get likelihoodToVisit() {
-
-    	return this.attractiveness - this.unrest * 10;// (this.unrest > 0 ? this.unrest : 1);
+    	var pctLikely = this.attractiveness - this.unrest * 3;// (this.unrest > 0 ? this.unrest : 1);
+    	if(Garden.getLivePlants().length <= 4) {
+    		pctLikely = 0;
+    	} else if(Garden.getLivePlants().length < 12) {
+    		pctLikely -= 20;
+    	} else if(Garden.getLivePlants().length < 20) {
+    		pctLikely -= 10;
+    	}
+    	return pctLikely - Garden.getDeadPlants().length;
     }
 
     static subtractMoney(amt) {
@@ -44,21 +51,43 @@ class Stats {
        // game.hud_bg.alpha = 0;
         game.hud_bg.endFill();
 
-        this.moneyText = game.make.text(10, 20, '',  { font: "24px Arial", fill: "#ddd" });
-		this.vampires = game.make.text(200, 20, '',  { font: "24px Arial", fill: "#faa" });
+        Notify.instruct("Click to marks spots for your vampires to plant.\n\"Recruiting\" a vampire gardener increases fear in the populace,\nwhich affects your popularity. Healthy plants help your popularity. \nVisitors give you money.");
+
+        this.moneyText = game.make.text(10, 15, '',  { font: "32px Arial Black", fill: "#ddd" });
+		this.vampires = game.make.text(175, 15, '',  { font: "32px Arial Black", fill: "#faa" });
+		//this.pendingVamp = game.make.text(195, 15, '',  { font: "14px Arial Black", fill: "#aaa" });
+
+		var s = game.add.image(150, 20, 'vampire', 0, game.textGroup);
+		s.scale.setTo(0.5);
 
         game.textGroup.add(this.moneyText);
         game.textGroup.add(this.vampires);
+        //game.textGroup.add(this.pendingVamp);
 
-        this.recruitBtn = game.add.button(400, 0, 'recruit-btn', function() {
-        	alert("recruited");
+        this.recruitBtn = game.add.button(250, 0, 'recruit-btn', function() {
         	VampireManager.hireVampire();
+        	Stats.display();
         	return false;
         });
         game.textGroup.add(this.recruitBtn);
 
-		this.recruitCost = game.make.text(455, 38, '$20',  { font: "22px Arial", fill: "#fff" });
+		this.recruitCost = game.make.text(this.recruitBtn.x +35, 40, '$10/day',  { font: "16px Arial Black", fill: "#fff" });
 		game.textGroup.add(this.recruitCost);
+
+		var t = game.make.text(this.recruitBtn.x + 175, 15, '+1 Gardener',  { font: "16px Arial Black", fill: "#fff" });
+		game.textGroup.add(t);
+
+		var u = game.make.text(this.recruitBtn.x + 175, 40, '+1 Fear',  { font: "16px Arial Black", fill: "#ff4e4e" });
+		game.textGroup.add(u);
+
+		this.popText = game.make.text(630, 15, 'Popularity',  { font: "16px Arial Black", fill: "#fff" });
+		game.textGroup.add(this.popText);
+
+		this.plantCount = game.make.text(this.popText.x, 40, '',  { font: "14px Arial", fill: "#fff" });
+		game.textGroup.add(this.plantCount);
+
+		this.unrestCount = game.make.text(this.popText.x +120, 40, 'Low Fear',  { font: "14px Arial", fill: "#f66" });
+		game.textGroup.add(this.unrestCount);
 
 		this.attractiveness = 80; // how attractive my park is.
 		this.money = 20;
@@ -66,12 +95,16 @@ class Stats {
 
 	static display() {
 		
-		this.moneyText.text = "Money: " + this.money;
-		this.vampires.text = VampireManager.getVampires().length + " vampire" + (VampireManager.getVampires().length == 1 ? "" : "s") + (_.isEmpty(VampireManager.pendingVampires) ? "" : "\nPending:" + VampireManager.pendingVampires.length);
+		this.moneyText.text = "$" + this.money;
+		
+		this.vampires.text = VampireManager.vampireCount();// + VampireManager.pendingVampires;
+		//this.pendingVamp.text = "/" + VampireManager.pendingVampires;//(pending ? "Pending:" + pending : "");
+		this.plantCount.text = "Healthy Plants: " + Garden.getLivePlants().length;
+		this.unrestCount.text = "Fear: " + Math.round(this.unrest*100)/100;
 
 		game.world.bringToTop(game.textGroup);
 
-		var popColor = this.popularity == 0 ? 0xFF3300 : this.popularity == 1 ? 0xFFAAAA : 0xAAFFAA;
+		var popColor = this.popularity == 0 ? 0xff0a0a : this.popularity == 1 ? 0xfcff0a : 0x0ab01e;
 		var popMarker = game.add.graphics(0,0);
 		popMarker.beginFill(popColor);
 		popMarker.drawEllipse(600, 35, 20, 20);

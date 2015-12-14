@@ -27,15 +27,17 @@ var WalkingSprite = (function () {
 	}, {
 		key: 'update',
 		value: function update() {
+
 			//game.physics.arcade.overlap(this.sprite, game.fountain, null, null, this);
 			game.physics.arcade.collide(this.sprite, game.fountain, function () {
 				console.log("******************** collide fountain ***");
 				if (this.collidedWithFountain) {
 					this.collidedWithFountain();
+				} else {
+					this.sprite.x += 10;
+					this.sprite.y -= 10;
+					this.recalcPath();
 				}
-				this.sprite.x += 10;
-				this.sprite.y -= 10;
-				this.recalcPath();
 			}, null, this);
 
 			// game.physics.arcade.collide(this.sprite, game.characterGroup, function() {
@@ -43,6 +45,8 @@ var WalkingSprite = (function () {
 			// }, null, this);	
 
 			if (this.curPath) {
+				//console.log("curPath", this);
+
 				this.findingPath = false;
 				//console.log("WE HAVE A PATH");
 				if (!this.pathIx) this.pathIx = 1;
@@ -105,12 +109,21 @@ var WalkingSprite = (function () {
 
 					this.curPath = null;
 					this.pathIx = 1;
+
+					this.curDir = null;
 				}
+
+				//this.recalcPath();
 			} else if (!this.findingPath) {
-				//console.log(this.id, this.plantsToWater.length, this.curPath);
-				//this.findingPath = true;
-				this.nextPath();
-			}
+					console.log("no path", this);
+					//console.log(this.id, this.plantsToWater.length, this.curPath);
+					//this.findingPath = true;
+					this.nextPath();
+				}
+			// else {
+			// 	//debug
+			// 	game.pathfinder.updateGrid();
+			// }
 		}
 	}]);
 

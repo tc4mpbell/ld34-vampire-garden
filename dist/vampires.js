@@ -14,11 +14,14 @@ var VampireManager = (function () {
 	}
 
 	_createClass(VampireManager, null, [{
+		key: 'vampireCount',
+		value: function vampireCount() {
+			if (!this.vampCount) this.vampCount = 0;
+
+			return this.vampCount + this.pendingVampires;
+		}
+	}, {
 		key: 'getVampires',
-
-		// static get vampires() { return this._vampires || []; }
-		// static set vampires(v) { this._vampires = v; }
-
 		value: function getVampires() {
 			if (!this.vampires) return [];
 			return this.vampires;
@@ -31,6 +34,8 @@ var VampireManager = (function () {
 			if (this.pendingVampires) {
 				for (var i = 0; i < this.pendingVampires; i++) {
 					this.vampires.push(new Vampire());
+					this.vampCount += 1;
+					Stats.unrest++;
 				}
 				this.pendingVampires = 0;
 				console.log("HIRED", this.vampires);
@@ -39,9 +44,48 @@ var VampireManager = (function () {
 	}, {
 		key: 'hireVampire',
 		value: function hireVampire() {
-			if (!this.pendingVampires) this.pendingVampires = 0;
+			if (Stats.money >= 10) {
+				if (!this.pendingVampires) this.pendingVampires = 0;
 
-			this.pendingVampires++;
+				this.pendingVampires++;
+				Stats.subtractMoney(10);
+			}
+		}
+	}, {
+		key: 'allRunAway',
+		value: function allRunAway() {
+			this.vampCount = this.vampires.length;
+			// make sure no plants are assigned.
+			_.each(Garden.plants, function (p) {
+				p.vampire = null;
+			});
+
+			_.each(_.clone(this.vampires), function (v) {
+				if (v) {
+					_.each(v.plantsToWater, function (p) {
+						p.vampire = null;
+					});
+
+					_.remove(this.vampires, { id: v.id });
+					game.emitter = game.add.emitter(v.sprite.x, v.sprite.y, 100);
+					game.emitter.makeParticles('water');
+					game.emitter.gravity = 100;
+					game.emitter.forEach(function (particle) {
+						// tint every particle red
+						particle.tint = 0xffaaaa;
+					});
+					game.emitter.start(true, 300, null, 20);
+					v.sprite.destroy();
+				}
+			}, this);
+		}
+	}, {
+		key: 'awakenAll',
+		value: function awakenAll() {
+
+			for (var i = 0; i < this.vampCount; i++) {
+				this.vampires.push(new Vampire());
+			}
 		}
 	}, {
 		key: 'update',
@@ -50,6 +94,18 @@ var VampireManager = (function () {
 				// update vampire
 				v.update();
 			});
+
+			if (DayManager.state == 'NIGHT') {
+				this.bringPendingVampiresToLife();
+			}
+		}
+	}, {
+		key: 'pendingVampires',
+		get: function get() {
+			return this._pendingVampires || 0;
+		},
+		set: function set(v) {
+			this._pendingVampires = v;
 		}
 	}]);
 
@@ -64,42 +120,48 @@ var Vampire = (function (_WalkingSprite) {
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Vampire).call(this));
 
-		_this.plantsToWater = [];
-		_this.paths = [];
-		_this.curPath = null;
-		_this.plantsToWaterIx = 0;
-		_this.waterLevel = 3;
-		_this.goingToFountain = false;
+		_this.reset();
+
 		_this.id = _.uniqueId();
 
-		_this.pathIx = 1;
-		for (var i = 0; i < 2 * Stats.efficiency; i++) {
-			// pick some unwatered plants
-			var plant = Garden.findUnassignedPlant();
-			if (plant) {
-				_this.addPlant(plant);
-			}
-		}
-
-		_this.sprite = game.add.sprite(500, 200, 'vampire', 0, game.characterGroup);
+		_this.sprite = game.add.sprite(_.random(32 * 20, 32 * 25), 5, 'vampire', 0, game.characterGroup);
 		_this.sprite.animations.add('walk', [0, 1], 8, true);
 
 		//this.sprite.tint = 0x86bfda;
-		_this.sprite.anchor.set(0.5, 1);
+		_this.sprite.anchor.set(0, 1);
 		game.physics.arcade.enable(_this.sprite);
 		_this.sprite.body.collideWorldBounds = true;
 
-		_this.sprite.body.bounce.setTo(1, 1);
-
-		_this.speed = 200;
+		//this.sprite.body.bounce.setTo(1, 1);
+		_this.speed = 350;
 		return _this;
 	}
 
 	_createClass(Vampire, [{
+		key: 'reset',
+		value: function reset() {
+			this.plantsToWater = [];
+			this.paths = [];
+			this.curPath = null;
+			this.plantsToWaterIx = 0;
+			this.waterLevel = 3;
+			this.goingToFountain = false;
+			this.pathIx = 1;
+
+			// for(var i = 0; i < 2 * Stats.efficiency; i++) {
+			// 	// pick some unwatered plants
+			// 	var plant = Garden.findUnassignedPlant();
+			// 	if(plant) {
+			// 		this.addPlant(plant);
+			// 	}
+			// }
+		}
+	}, {
 		key: 'water',
 		value: function water(plant) {
 			plant.water();
 			this.waterLevel -= 1;
+			if (plant.vampire) plant.vampire = null;
 
 			//  Position the emitter where the mouse/touch event was
 			console.log(game.emitter);
@@ -117,11 +179,11 @@ var Vampire = (function (_WalkingSprite) {
 		value: function roomForPlants() {
 			return !this.plantsToWater || this.plantsToWater.length < 2 * Stats.efficiency;
 		}
-	}, {
-		key: 'addPlant',
-		value: function addPlant(p) {
-			p.assignVampire(this);
-		}
+
+		// addPlant(p) {
+		// 	//p.assignVampire(this);
+		// }
+
 	}, {
 		key: 'setCurPath',
 		value: function setCurPath(path) {
@@ -131,24 +193,61 @@ var Vampire = (function (_WalkingSprite) {
 			console.log("FOUND PATH 1", this.curPath);
 		}
 	}, {
+		key: 'pathFailed',
+		value: function pathFailed() {
+			this.findingPath = false;
+			this.curPath = false;
+			this.goingToFountain = false;
+			this.waterLevel = 1;
+			this.sprite.body.velocity.x = 0;
+			this.sprite.body.velocity.y = 0;
+			this.sprite.x += 10;
+			this.nextPath();
+		}
+	}, {
+		key: 'collideWithFountain',
+		value: function collideWithFountain() {
+			var that = this;
+			this.curPath = null;
+			setTimeout(function () {
+				// REFILL WATER
+				Notify.log("Refilling water!");
+				console.log("REFILLING)");
+				that.goingToFountain = false;
+				that.findingPath = false;
+				that.waterLevel = 3;
+			}, 1000);
+		}
+	}, {
 		key: 'nextPath',
 		value: function nextPath() {
-			if (!this.findingPath && !this.curPath && !this.goingToFountain && this.plantsToWater.length > 0) {
+			// make sure.
+			_.each(_.filter(Garden.plants, { vampire: this }), function (p) {
+				p.vampire = null;
+			});
+
+			console.log("next Path", !this.findingPath, !this.curPath, !this.goingToFountain); //, this.plantsToWater.length > 0);
+			if (!this.findingPath && !this.curPath && !this.goingToFountain) {
+				//} && this.plantsToWater.length > 0) {
 				// should alternate watering with going to fountain
 				// or maybe can water x plants before need refill...
 				if (this.waterLevel <= 0) {
 					// need to return to the fountain!
 					this.waterLevel = 0;
 					this.goingToFountain = true;
+					console.log("WATER PATH:", game.fountain.x + game.fountain.width + 1, game.fountain.y + game.fountain.height / 2);
 					game.pathfinder.findPath(this, game.fountain, this.sprite.x, this.sprite.y, game.fountain.x + game.fountain.width + 1, game.fountain.y + game.fountain.height / 2);
 				} else {
 					//get water plant path
-					var p = this.plantsToWater[this.plantsToWaterIx];
+					var p = Garden.findUnassignedPlant(); //this.plantsToWater[this.plantsToWaterIx];
 
 					if (this.plantsToWaterIx && this.plantsToWaterIx >= this.plantsToWater.length - 1) this.plantsToWaterIx = 0;else this.plantsToWaterIx++;
 
 					if (p) {
+						p.vampire = this;
 						game.pathfinder.findPath(this, p, this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
+					} else {
+						console.log("COULDN'T FIND PLANT");
 					}
 				}
 			}
@@ -159,13 +258,7 @@ var Vampire = (function (_WalkingSprite) {
 			// END OF PATH
 			//console.log("goingToFountain", this.goingToFountain);
 			if (this.goingToFountain) {
-				var that = this;
-				setTimeout(function () {
-					// REFILL WATER
-					console.log("REFILLING)");
-					that.goingToFountain = false;
-					that.waterLevel = 3;
-				}, 1000);
+				this.collideWithFountain();
 			} else {
 				this.water(this.curPath.destination);
 			}
